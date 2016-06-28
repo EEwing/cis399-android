@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">PigGame</string>
+    <string name="score_label">Score</string>
+    <string name="player_one_label">Player 1</string>
+    <string name="player_two_label">Player 2</string>
+    <string name="current_points">Points for this turn</string>
+    <string name="roll_msg">Roll Die</string>
+    <string name="end_turn">End Turn</string>
+    <string name="new_game">New Game</string>
+</resources>
