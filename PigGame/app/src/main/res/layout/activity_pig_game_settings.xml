@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    tools:context="com.prorl.quent.piggame.PigGameSettingsActivity">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="Maximum points"
+        android:id="@+id/max_points_label"
+        android:layout_alignBaseline="@+id/max_pts"
+        android:layout_alignBottom="@+id/max_pts"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/max_pts"
+        android:text="100"
+        android:layout_alignParentTop="true"
+        android:layout_alignLeft="@+id/num_sides"
+        android:layout_alignStart="@+id/num_sides" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="Number of die sides"
+        android:id="@+id/die_side_count_label"
+        android:layout_alignBaseline="@+id/num_sides"
+        android:layout_alignBottom="@+id/num_sides"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/num_sides"
+        android:text="6"
+        android:layout_below="@+id/max_pts"
+        android:layout_alignLeft="@+id/dead_side"
+        android:layout_alignStart="@+id/dead_side" />
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/dead_side"
+        android:text="1"
+        android:layout_marginLeft="53dp"
+        android:layout_marginStart="53dp"
+        android:layout_below="@+id/num_sides"
+        android:layout_toRightOf="@+id/die_side_count_label"
+        android:layout_toEndOf="@+id/die_side_count_label" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="Dead die side"
+        android:id="@+id/textView2"
+        android:layout_alignBaseline="@+id/dead_side"
+        android:layout_alignBottom="@+id/dead_side"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_toLeftOf="@+id/dead_side"
+        android:layout_toStartOf="@+id/dead_side" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Decides which roll ends the turn"
+        android:id="@+id/textView3"
+        android:layout_below="@+id/textView2"
+        android:layout_toLeftOf="@+id/num_sides"
+        android:layout_toStartOf="@+id/num_sides" />
+
+    <CheckBox
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Enable AI Mode"
+        android:id="@+id/ai_mode"
+        android:checked="false"
+        android:layout_below="@+id/textView3"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Submit Settings"
+        android:id="@+id/btn_submit_settings"
+        android:layout_marginTop="30dp"
+        android:layout_below="@+id/ai_mode"
+        android:layout_centerHorizontal="true" />
+
+</RelativeLayout>

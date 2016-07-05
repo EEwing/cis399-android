@@ -1,13 +1,20 @@
 package com.prorl.quent.piggame;
 
+import android.app.Activity;
+import android.content.Intent;
 import android.content.SharedPreferences;
+import android.media.audiofx.BassBoost;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.prorl.quent.piggame.com.prorl.quent.piggame.listeners.PigGameEventListener;
 
@@ -18,6 +25,8 @@ public class PigGameMainActivity extends AppCompatActivity implements PigGameEve
     Provides game rule implementation
      */
     final PigGame game = new PigGame();
+
+    private static final int SETTINGS_RESULT = 1;
 
     /*
     Editable UI elements
@@ -100,64 +109,70 @@ public class PigGameMainActivity extends AppCompatActivity implements PigGameEve
             @Override
             public void onClick(View view) {
                 game.newGame();
+                player1Name.setText("");
+                player2Name.setText("");
                 updateDisplay();
             }
         });
     }
 
     @Override
-    public void onPause() {
-        super.onPause();
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_main, menu);
+        return true;
+    }
 
-        // Write data to data storage object
-        SharedPreferences.Editor editor = savedData.edit();
-        editor.putInt("p1Score", game.getScore(PigGame.Player.ONE));
-        editor.putInt("p2Score", game.getScore(PigGame.Player.TWO));
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch(item.getItemId()) {
+            case R.id.menu_about:
+                Toast.makeText(this.getApplication(), "PigGame app made by Elliott Ewing for CIS 399 - Android App Development, taught by Brian Bird", Toast.LENGTH_LONG
+                ).show();
+                return true;
+            case R.id.menu_settings:
+                Intent intent = new Intent(this, PigGameSettingsActivity.class);
+                startActivityForResult(intent, SETTINGS_RESULT);
+                return true;
 
-        editor.putString("p1Name", player1Name.getText().toString());
-        editor.putString("p2Name", player2Name.getText().toString());
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
 
-        int curPlayer = -1;
-        switch(game.getCurrentPlayer()) {
-            case ONE:
-                curPlayer = 0;
+    @Override
+    public void onActivityResult(int req, int res, Intent data) {
+        super.onActivityResult(req, res, data);
+        switch(req) {
+            case SETTINGS_RESULT:
+                if(res == Activity.RESULT_OK) {
+                    int numSides = data.getIntExtra("numSides", 6);
+                    int maxScore = data.getIntExtra("maxScore", 100);
+                    int deadSide = data.getIntExtra("deadSide", 1);
+                    boolean aiMode = data.getBooleanExtra("aiMode", false);
+                    game.setAiMode(aiMode);
+                    game.setDeadSide(deadSide);
+                    game.setDieSize(numSides);
+                    game.setMaxScore(maxScore);
+                    saveData();
+                    //updateDisplay();
+                }
                 break;
-            case TWO:
-                curPlayer = 1;
+            default:
                 break;
         }
-        editor.putInt("curTurn", curPlayer);
-        editor.putInt("curTurnScore", game.getCurrentTurnScore());
-        editor.putInt("lastRoll", lastRoll);
+    }
 
-        // Finialize data storage
-        editor.commit();
+    @Override
+    public void onPause() {
+        super.onPause();
+        saveData();
     }
 
     @Override
     public void onResume() {
         super.onResume();
-
-        // Retrieve stored data
-        player1Name.setText(savedData.getString("p1Name", ""));
-        player2Name.setText(savedData.getString("p2Name", ""));
-
-        // Set up game state from data storage object
-        game.setScore(PigGame.Player.ONE, savedData.getInt("p1Score", 0));
-        game.setScore(PigGame.Player.TWO, savedData.getInt("p2Score", 0));
-
-        int curPlayer = savedData.getInt("curTurn", 0);
-        switch(curPlayer) {
-            case 0:
-                game.setCurrentPlayer(PigGame.Player.ONE);
-                break;
-            case 1:
-                game.setCurrentPlayer(PigGame.Player.TWO);
-                break;
-        }
-        game.setCurrentTurnScore(savedData.getInt("curTurnScore", 0));
-        lastRoll = savedData.getInt("lastRoll", 0);
-
+        loadData();
         // Update display with PigGame data from data storage object
         updateDisplay();
     }
@@ -212,6 +227,13 @@ public class PigGameMainActivity extends AppCompatActivity implements PigGameEve
             diceDisplay.setImageResource(diceID);
         }
 
+        if(game.getAIMode()) {
+            player2Name.setEnabled(false);
+            player2Name.setText("Computer");
+        } else {
+            player2Name.setEnabled(true);
+        }
+
     }
 
     @Override
@@ -227,5 +249,63 @@ public class PigGameMainActivity extends AppCompatActivity implements PigGameEve
                 break;
         }
         playerDisplay.setText(winnerName + " Wins!");
+    }
+
+    private void saveData() {
+        // Write data to data storage object
+        SharedPreferences.Editor editor = savedData.edit();
+        editor.putInt("p1Score", game.getScore(PigGame.Player.ONE));
+        editor.putInt("p2Score", game.getScore(PigGame.Player.TWO));
+
+        editor.putString("p1Name", player1Name.getText().toString());
+        editor.putString("p2Name", player2Name.getText().toString());
+
+        editor.putInt("maxScore", game.getMaxScore());
+        editor.putInt("numSides", game.getDieSize());
+        editor.putInt("deadSide", game.getDeadSide());
+        editor.putBoolean("aiMode", game.getAIMode());
+
+        int curPlayer = -1;
+        switch(game.getCurrentPlayer()) {
+            case ONE:
+                curPlayer = 0;
+                break;
+            case TWO:
+                curPlayer = 1;
+                break;
+        }
+        editor.putInt("curTurn", curPlayer);
+        editor.putInt("curTurnScore", game.getCurrentTurnScore());
+        editor.putInt("lastRoll", lastRoll);
+
+        // Finialize data storage
+        editor.commit();
+    }
+
+    private void loadData() {
+        // Retrieve stored data
+        player1Name.setText(savedData.getString("p1Name", ""));
+        player2Name.setText(savedData.getString("p2Name", ""));
+
+        // Set up game state from data storage object
+        game.setScore(PigGame.Player.ONE, savedData.getInt("p1Score", 0));
+        game.setScore(PigGame.Player.TWO, savedData.getInt("p2Score", 0));
+        game.setAiMode(savedData.getBoolean("aiMode", false));
+        game.setDeadSide(savedData.getInt("deadSide", 1));
+        game.setDieSize(savedData.getInt("numSides", 6));
+        game.setMaxScore(savedData.getInt("maxScore", 100));
+
+        int curPlayer = savedData.getInt("curTurn", 0);
+        switch(curPlayer) {
+            case 0:
+                game.setCurrentPlayer(PigGame.Player.ONE);
+                break;
+            case 1:
+                game.setCurrentPlayer(PigGame.Player.TWO);
+                break;
+        }
+        game.setCurrentTurnScore(savedData.getInt("curTurnScore", 0));
+        lastRoll = savedData.getInt("lastRoll", 0);
+
     }
 }

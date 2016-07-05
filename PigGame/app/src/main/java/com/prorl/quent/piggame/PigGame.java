@@ -13,6 +13,7 @@ import java.util.Random;
  */
 public class PigGame {
 
+
     /**
      * Static references to the two players in the game of "Pig"
      */
@@ -20,11 +21,6 @@ public class PigGame {
         ONE,
         TWO;
     }
-
-    /**
-     * Static reference to a maximum score. Baked into the compilation of this class
-     */
-    public static final int MAX_SCORE = 100;
 
     /**
      * Holds score amounts for each of the players in the Player enum
@@ -35,6 +31,11 @@ public class PigGame {
      * A random object, used to emulate dice roll
      */
     private Random dice;
+
+    private int deadSide = 1;
+    private int maxScore = 100;
+    private int numSides = 6;
+    private boolean aiMode = false;
 
     /**
      * The score of the current turn
@@ -69,8 +70,8 @@ public class PigGame {
         scores.put(currentPlayer, scores.get(currentPlayer) + currentTurnScore);
         currentTurnScore = 0;
 
-        if(currentPlayer == Player.TWO && (scores.get(Player.ONE) > MAX_SCORE || scores.get(Player.TWO) > MAX_SCORE)) {
-            newGame();
+        if(currentPlayer == Player.TWO && (scores.get(Player.ONE) >= maxScore || scores.get(Player.TWO) >= maxScore)) {
+            declareWinner();
             return true;
         }
 
@@ -82,6 +83,17 @@ public class PigGame {
                 currentPlayer = Player.ONE;
                 break;
         }
+
+        if(currentPlayer == Player.TWO && aiMode) {
+            Random rand = new Random();
+            int roll = -1;
+            while(rand.nextInt(100) > 50 && roll != deadSide) {
+                roll = rollDice();
+            }
+            if(roll != deadSide && currentPlayer == Player.TWO && getScore(Player.TWO) + currentTurnScore < maxScore ) {
+                nextTurn();
+            }
+        }
         return false;
     }
 
@@ -91,11 +103,11 @@ public class PigGame {
      * @return the face value of the dice
      */
     public int rollDice() {
-        int roll = dice.nextInt(6) + 1;
-        if(roll == 1) {
+        int roll = dice.nextInt(numSides) + 1;
+        if(roll == deadSide) {
             currentTurnScore = 0;
             nextTurn();
-            return 1;
+            return deadSide;
         }
         currentTurnScore += roll;
         return roll;
@@ -150,6 +162,10 @@ public class PigGame {
         return scores.get(player);
     }
 
+    public boolean getAIMode() {
+        return aiMode;
+    }
+
     /**
      * Set the current event listener for this class
      *
@@ -185,6 +201,33 @@ public class PigGame {
      */
     public void setCurrentPlayer(Player player) {
         currentPlayer = player;
+    }
+
+    public void setMaxScore(int maxScore) {
+        this.maxScore = maxScore;
+    }
+
+    public void setDieSize(int numSides) {
+        this.numSides = numSides;
+    }
+
+    public void setAiMode(boolean mode) {
+        this.aiMode = mode;
+    }
+
+    public void setDeadSide(int side) {
+        this.deadSide = side;
+    }
+
+    public int getMaxScore() {
+        return maxScore;
+    }
+
+    public int getDieSize() {
+        return numSides;
+    }
+    public int getDeadSide() {
+        return deadSide;
     }
 
     /**
